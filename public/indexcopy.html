@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmFresh - Fresh from Farm to Table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #F4F7F2;
+    color: #1a2e1a;
+  }
+
+  .font-display { font-family: 'Fraunces', serif; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Smooth scroll */
+  html { scroll-behavior: smooth; }
+
+  /* Hero animated canvas bg */
+  #heroCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Product card hover */
+  .product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+  }
+
+  /* Farmer card hover */
+  .farmer-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .farmer-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(34,197,94,0.25);
+  }
+
+  /* Feature card hover */
+  .feature-card {
+    transition: background 0.3s ease;
+  }
+  .feature-card:hover { background: rgba(255,255,255,0.18) !important; }
+
+  /* Nav link hover */
+  .nav-link {
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-link:hover {
+    background: rgba(255,255,255,0.15) !important;
+    color: white !important;
+  }
+
+  /* Notification slide */
+  @keyframes slideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+  }
+
+  /* Gallery hover */
+  .gallery-item img {
+    transition: transform 0.5s ease;
+  }
+  .gallery-item:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Animate on load */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.7s ease forwards; }
+  .fade-up-delay-1 { animation: fadeUp 0.7s 0.15s ease both; }
+  .fade-up-delay-2 { animation: fadeUp 0.7s 0.3s ease both; }
+  .fade-up-delay-3 { animation: fadeUp 0.7s 0.45s ease both; }
+
+  /* Stat border */
+  .stat-block + .stat-block {
+    border-left: 1px solid #d1d5d1;
+    padding-left: 2rem;
+  }
+
+  /* Cart badge pulse */
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+  }
+  .cart-badge { animation: pulse 2s infinite; }
+
+  /* Mobile nav responsive */
+  @media (max-width: 768px) {
+    #desktopNav { display: none !important; }
+    #desktopActions { display: none !important; }
+    #hamburgerBtn { display: flex !important; }
+  }
+  .section-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .section-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+<script src="script.js"></script>
+</head>
+<body class="antialiased selection:bg-green-900 selection:text-white">
+
+<div class="max-w-[1600px] mx-auto p-2 sm:p-4 lg:p-6">
+
+  <!-- ===================== HERO ===================== -->
+  <header class="relative w-full h-[95vh] min-h-[700px] rounded-[2rem] overflow-hidden shadow-2xl">
+
+    <!-- Animated Canvas Background -->
+    <canvas id="heroCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;"></canvas>
+
+    <!-- Gradient Overlay — pointer-events:none so clicks pass through -->
+    <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,0.35),transparent 45%,rgba(0,0,0,0.7));"></div>
+
+    <!-- ---- NAV ---- -->
+    <nav style="position:absolute;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 2.5rem;">
+      <!-- Logo -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="background:rgba(255,255,255,0.18);backdrop-filter:blur(12px);padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        </div>
+        <span style="color:white;font-size:1.2rem;font-weight:500;font-family:'Fraunces',serif;">FarmFresh.</span>
+      </div>
+
+      <!-- Desktop Menu -->
+      <div id="desktopNav" style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.12);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);border-radius:999px;padding:6px 8px;">
+        <a href="#about" style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:8px 20px;border-radius:999px;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">About</a>
+        <a href="#shop" style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:8px 20px;border-radius:999px;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">Shop</a>
+        <a href="#farmers" style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:8px 20px;border-radius:999px;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">Farmers</a>
+        <a href="orders.html" style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:8px 20px;border-radius:999px;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">Orders</a>
+        <a href="#contact" style="color:rgba(255,255,255,0.9);font-size:0.875rem;padding:8px 20px;border-radius:999px;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">Contact</a>
+      </div>
+
+      <!-- Right Actions -->
+      <div id="desktopActions" style="display:flex;align-items:center;gap:12px;">
+        <a href="cart.html" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);color:white;text-decoration:none;position:relative;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span style="position:absolute;top:8px;right:8px;width:8px;height:8px;background:#4ade80;border-radius:50%;"></span>
+        </a>
+        <a href="orders.html" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);color:white;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'" title="My Orders">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </a>
+        <a href="#contact" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);color:white;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+        </a>
+        <a href="login.html" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);padding:8px 18px;border-radius:999px;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span style="font-size:0.875rem;font-weight:600;color:white;">Login</span>
+        </a>
+        <a href="#shop" style="display:flex;align-items:center;gap:10px;background:white;padding:6px 6px 6px 20px;border-radius:999px;text-decoration:none;" onmouseover="this.style.boxShadow='0 8px 24px rgba(255,255,255,0.2)'" onmouseout="this.style.boxShadow='none'">
+          <span style="font-size:0.875rem;font-weight:600;color:#14532d;">Shop Now</span>
+          <span style="width:32px;height:32px;background:#15803d;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+        <!-- Mobile hamburger -->
+        <button id="hamburgerBtn" onclick="toggleMobileMenu()" style="display:none;width:40px;height:40px;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);color:white;cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" style="display:none;position:absolute;top:76px;left:1rem;right:1rem;z-index:30;background:rgba(10,30,14,0.92);backdrop-filter:blur(20px);border-radius:16px;padding:12px;border:1px solid rgba(255,255,255,0.12);">
+      <a href="#about" onclick="toggleMobileMenu()" style="display:block;padding:12px 16px;color:rgba(255,255,255,0.9);font-size:0.875rem;border-radius:10px;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">About</a>
+      <a href="#shop" onclick="toggleMobileMenu()" style="display:block;padding:12px 16px;color:rgba(255,255,255,0.9);font-size:0.875rem;border-radius:10px;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">Shop</a>
+      <a href="#farmers" onclick="toggleMobileMenu()" style="display:block;padding:12px 16px;color:rgba(255,255,255,0.9);font-size:0.875rem;border-radius:10px;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">Farmers</a>
+      <a href="#contact" onclick="toggleMobileMenu()" style="display:block;padding:12px 16px;color:rgba(255,255,255,0.9);font-size:0.875rem;border-radius:10px;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">Contact</a>
+      <a href="orders.html" style="display:block;padding:12px 16px;color:rgba(255,255,255,0.9);font-size:0.875rem;border-radius:10px;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">📦 My Orders</a>
+      <a href="login.html" style="display:block;padding:12px 16px;color:rgba(255,255,255,0.9);font-size:0.875rem;border-radius:10px;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">🔐 Login</a>
+      <a href="cart.html" style="display:block;margin-top:8px;padding:12px 16px;background:#16a34a;color:white;font-size:0.875rem;border-radius:10px;text-decoration:none;font-weight:600;text-align:center;">🛒 View Cart</a>
+    </div>
+
+    <!-- ---- HERO CONTENT ---- -->
+    <div style="position:absolute;inset:0;z-index:5;pointer-events:none;display:flex;align-items:center;justify-content:center;padding-top:80px;">
+      <div style="text-align:center;max-width:720px;padding:0 1.5rem;pointer-events:auto;">
+        <span class="fade-up" style="display:inline-block;padding:6px 16px;margin-bottom:24px;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;color:white;text-transform:uppercase;background:rgba(34,197,94,0.3);backdrop-filter:blur(8px);border-radius:999px;border:1px solid rgba(74,222,128,0.3);">
+          🌿 100% Organic &amp; Farm Fresh
+        </span>
+        <h1 class="fade-up-delay-1 font-display" style="font-size:clamp(2.8rem,6vw,4.5rem);color:white;font-weight:500;line-height:1.1;margin:0 0 24px;font-family:'Fraunces',serif;">
+          From the Farm,<br><em style="font-style:italic;font-weight:300;">Straight to You.</em>
+        </h1>
+        <p class="fade-up-delay-2" style="font-size:1.125rem;color:rgba(255,255,255,0.8);font-weight:300;line-height:1.7;margin:0 auto 40px;max-width:480px;">
+          Fresh, chemical-free organic produce sourced from local farmers — delivered right to your doorstep.
+        </p>
+        <div class="fade-up-delay-3" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
+          <a href="#shop" style="display:inline-flex;align-items:center;gap:16px;background:white;color:#14532d;padding:8px 8px 8px 32px;border-radius:999px;text-decoration:none;font-weight:600;font-size:1rem;" onmouseover="this.style.boxShadow='0 12px 32px rgba(0,0,0,0.2)'" onmouseout="this.style.boxShadow='none'">
+            Browse Products
+            <span style="width:48px;height:48px;background:#15803d;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+            </span>
+          </a>
+          <a href="register.html" style="display:inline-flex;align-items:center;gap:10px;border:1.5px solid rgba(255,255,255,0.45);color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:500;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">
+            🌱 Join as Farmer
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== ABOUT ===================== -->
+  <section id="about" class="mt-24 px-4 sm:px-6 section-reveal">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+      <div class="lg:col-span-6">
+        <span class="text-green-600 font-semibold uppercase text-xs tracking-widest mb-4 block">Our Story</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-medium tracking-tight text-stone-900 mb-6 leading-snug">
+          Growing Goodness,<br>
+          <em class="italic font-light text-green-700">Delivering Health.</em>
+        </h2>
+        <p class="text-stone-500 text-lg leading-relaxed mb-6 font-light">
+          We believe the best food comes straight from the earth — grown with care, harvested at peak freshness, and brought to your table without the middlemen or chemicals.
+        </p>
+        <p class="text-stone-500 text-base leading-relaxed mb-8">
+          FarmFresh connects local farmers directly with families, supporting sustainable agriculture while ensuring you always get the freshest, most nutritious produce available.
+        </p>
+
+        <div class="flex gap-8 border-t border-stone-200 pt-8">
+          <div class="stat-block">
+            <span class="block text-2xl font-bold text-green-700">100%</span>
+            <span class="text-sm text-stone-500">Chemical Free</span>
+          </div>
+          <div class="stat-block">
+            <span class="block text-2xl font-bold text-green-700">Daily</span>
+            <span class="text-sm text-stone-500">Fresh Harvest</span>
+          </div>
+          <div class="stat-block">
+            <span class="block text-2xl font-bold text-green-700">50+</span>
+            <span class="text-sm text-stone-500">Local Farmers</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-6 relative">
+        <div class="relative h-[500px] w-full rounded-[2rem] overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?q=80&w=1600&auto=format&fit=crop" alt="Fresh farm produce" class="absolute inset-0 w-full h-full object-cover">
+          <!-- Badge overlay -->
+          <div class="absolute bottom-6 left-6 right-6">
+            <div class="bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-white/20 inline-flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+              </div>
+              <div>
+                <span class="text-xs font-bold text-stone-400 uppercase tracking-wider block">Certified Organic</span>
+                <p class="text-stone-900 font-semibold text-sm">Straight from the Field</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRODUCT CATEGORIES ===================== -->
+  <section id="shop" class="mt-24 px-4 sm:px-6 section-reveal">
+    <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+      <div class="max-w-xl">
+        <span class="text-green-600 font-semibold uppercase text-xs tracking-widest mb-3 block">Fresh Picks</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-medium tracking-tight text-stone-900 mb-4">Shop by Category</h2>
+        <p class="text-stone-500 font-light">Explore our most loved categories, harvested fresh every day.</p>
+      </div>
+      <a href="#products" class="hidden md:flex items-center gap-2 text-green-700 font-semibold hover:opacity-70 transition-opacity mt-4 md:mt-0">
+        View All Products
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Card 1: Vegetables -->
+      <div class="product-card group relative bg-white p-2 rounded-3xl shadow-sm cursor-pointer">
+        <div class="h-64 rounded-2xl overflow-hidden mb-4 relative">
+          <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=1400&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Fresh Vegetables">
+          <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-green-700">Bestseller</div>
+        </div>
+        <div class="px-4 pb-6">
+          <h3 class="font-display text-xl font-semibold text-stone-900 mb-2">Fresh Vegetables</h3>
+          <p class="text-stone-500 text-sm mb-4">From leafy greens to root vegetables — crisp, chemical-free, and farm-harvested daily.</p>
+          <div class="flex items-center justify-between mt-4">
+            <span class="text-sm font-medium text-stone-400">Organic Veggies</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-700 -rotate-45"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Fruits -->
+      <div class="product-card group relative bg-white p-2 rounded-3xl shadow-sm cursor-pointer">
+        <div class="h-64 rounded-2xl overflow-hidden mb-4 relative">
+          <img src="https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?q=80&w=1400&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Fresh Fruits">
+          <div class="absolute top-4 right-4 bg-green-500/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-white">Seasonal</div>
+        </div>
+        <div class="px-4 pb-6">
+          <h3 class="font-display text-xl font-semibold text-stone-900 mb-2">Seasonal Fruits</h3>
+          <p class="text-stone-500 text-sm mb-4">Nature's sweetest gifts — mangoes, berries, citrus, and tropical fruits at peak ripeness.</p>
+          <div class="flex items-center justify-between mt-4">
+            <span class="text-sm font-medium text-stone-400">Fresh Fruits</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-700 -rotate-45"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Grains & More -->
+      <div class="product-card group relative bg-white p-2 rounded-3xl shadow-sm cursor-pointer">
+        <div class="h-64 rounded-2xl overflow-hidden mb-4 relative">
+          <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=1400&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Grains and Herbs">
+        </div>
+        <div class="px-4 pb-6">
+          <h3 class="font-display text-xl font-semibold text-stone-900 mb-2">Grains &amp; Herbs</h3>
+          <p class="text-stone-500 text-sm mb-4">Heritage grains, aromatic herbs, and natural spices — the essentials for wholesome cooking.</p>
+          <div class="flex items-center justify-between mt-4">
+            <span class="text-sm font-medium text-stone-400">Pantry Staples</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-700 -rotate-45"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== WHY CHOOSE US ===================== -->
+  <section class="mt-24 bg-green-900 text-white rounded-[2rem] overflow-hidden relative py-20 px-6 sm:px-12 section-reveal">
+    <div class="absolute inset-0 opacity-15">
+      <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=2000&auto=format&fit=crop" alt="Farm field" class="w-full h-full object-cover">
+    </div>
+    <!-- Decorative blobs -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-green-500/20 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 bg-emerald-400/20 rounded-full translate-y-1/2 -translate-x-1/4 blur-3xl"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto text-center mb-16">
+      <span class="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest text-green-300 uppercase bg-green-500/20 rounded-full border border-green-400/20">Why FarmFresh</span>
+      <h2 class="font-display text-3xl sm:text-4xl font-medium tracking-tight mb-4">We Don't Just Sell Produce.</h2>
+      <p class="text-green-200 text-lg font-light">We build a healthier, more sustainable food future — one delivery at a time.</p>
+    </div>
+
+    <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div class="feature-card bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/10 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-white text-green-800 flex items-center justify-center mx-auto mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold mb-3">100% Organic</h3>
+        <p class="text-green-300 font-light text-sm leading-relaxed">Zero pesticides, zero preservatives. Every product is certified organic and safe for your family.</p>
+      </div>
+
+      <div class="feature-card bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/10 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-white text-green-800 flex items-center justify-center mx-auto mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold mb-3">Direct from Farmers</h3>
+        <p class="text-green-300 font-light text-sm leading-relaxed">No middlemen — you buy directly from verified local farmers, supporting their livelihoods.</p>
+      </div>
+
+      <div class="feature-card bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/10 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-white text-green-800 flex items-center justify-center mx-auto mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><polyline points="12 19 15 22 22 15"/><rect x="9" y="11" width="14" height="10" rx="1"/></svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold mb-3">Same-Day Delivery</h3>
+        <p class="text-green-300 font-light text-sm leading-relaxed">Fresh produce delivered the same day it's harvested, preserving all nutrients and natural flavour.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRODUCTS GRID ===================== -->
+  <section id="products" class="mt-24 px-4 sm:px-6 section-reveal">
+    <div class="text-center mb-12">
+      <span class="text-green-600 font-semibold uppercase text-xs tracking-widest mb-3 block">Fresh Today</span>
+      <h2 class="font-display text-3xl sm:text-4xl font-medium tracking-tight text-stone-900 mb-4">Our Products</h2>
+      <p class="text-stone-500 font-light max-w-md mx-auto">Fresh organic produce sourced from local farms, updated daily.</p>
+    </div>
+
+    <!-- Demo product cards (replace with dynamic JS from your backend) -->
+    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Loaded dynamically from /api/products -->
+    </div>
+
+  <!-- ===================== GALLERY ===================== -->
+  <section class="mt-24 px-4 sm:px-6 section-reveal">
+    <h2 class="font-display text-3xl sm:text-4xl font-medium tracking-tight text-stone-900 mb-4 text-center">A Glimpse of Nature</h2>
+    <p class="text-stone-500 text-center mb-12 font-light">From field to doorstep — freshness you can see</p>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 h-[600px]">
+      <div class="gallery-item col-span-2 md:col-span-2 row-span-2 rounded-3xl overflow-hidden relative">
+        <img src="https://images.unsplash.com/photo-1471193945509-9ad0617afabf?q=80&w=1200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Farm produce">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+        <div class="absolute bottom-6 left-6">
+          <span class="bg-white/90 backdrop-blur text-green-800 text-xs font-bold px-3 py-1.5 rounded-full">🌿 Farm Fresh</span>
+        </div>
+      </div>
+      <div class="gallery-item col-span-1 rounded-3xl overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1558818498-28c1e002b655?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover" alt="Vegetables">
+      </div>
+      <div class="gallery-item col-span-1 row-span-2 rounded-3xl overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover" alt="Farmer market">
+      </div>
+      <div class="gallery-item col-span-1 rounded-3xl overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1508330179177-7c21c6bdc2d5?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover" alt="Fruits">
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DELIVERY HOURS ===================== -->
+  <section class="mt-24 px-4 sm:px-6 section-reveal">
+    <div class="bg-green-50 rounded-[2rem] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden border border-green-100">
+      <div class="absolute top-0 left-0 w-64 h-64 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></div>
+      <div class="absolute bottom-0 right-0 w-48 h-48 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-x-1/4 translate-y-1/4"></div>
+
+      <div class="relative z-10 max-w-2xl mx-auto">
+        <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-700"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <h2 class="font-display text-3xl sm:text-4xl font-medium tracking-tight text-stone-900 mb-3">Delivery Timings</h2>
+        <p class="text-stone-500 mb-10 font-light">We harvest and dispatch fresh every morning, so you always get the best.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-green-100">
+            <span class="block text-xs text-stone-500 font-bold uppercase tracking-widest mb-2">Mon – Sat</span>
+            <span class="text-2xl font-bold text-stone-900">6:00 AM – 8:00 PM</span>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-green-100">
+            <span class="block text-xs text-stone-500 font-bold uppercase tracking-widest mb-2">Sunday</span>
+            <span class="text-2xl font-bold text-stone-900">7:00 AM – 2:00 PM</span>
+          </div>
+        </div>
+        <p class="mt-8 text-stone-500 font-light">🚚 Free delivery on orders above ₹500</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== OUR FARMERS ===================== -->
+  <section id="farmers" class="mt-24 px-4 sm:px-6 section-reveal">
+    <div class="text-center mb-12">
+      <span class="text-green-600 font-semibold uppercase text-xs tracking-widest mb-3 block">Meet the Growers</span>
+      <h2 class="font-display text-3xl sm:text-4xl font-medium tracking-tight text-stone-900 mb-4">Our Farmers</h2>
+      <p class="text-stone-500 font-light max-w-md mx-auto">Dedicated farmers who put their heart into every harvest.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Farmer 1 -->
+      <div class="farmer-card bg-gradient-to-br from-green-600 to-green-800 rounded-3xl p-8 text-center text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8"></div>
+        <div class="w-28 h-28 rounded-full overflow-hidden mx-auto mb-5 border-4 border-white/30 relative z-10">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop" class="w-full h-full object-cover" alt="Rajesh Kumar">
+        </div>
+        <h4 class="font-display text-xl font-semibold mb-1">Rajesh Kumar</h4>
+        <p class="text-green-200 text-sm mb-1">Green Valley Farm</p>
+        <span class="text-xs text-green-300">Organic Vegetables Specialist</span>
+        <div class="flex justify-between mt-5 pt-5 border-t border-white/20 text-sm">
+          <div><div class="font-bold">5+</div><div class="text-green-300 text-xs">Years Exp</div></div>
+          <div><div class="font-bold">50+</div><div class="text-green-300 text-xs">Products</div></div>
+          <div><div class="font-bold">4.9★</div><div class="text-green-300 text-xs">Rating</div></div>
+        </div>
+      </div>
+
+      <!-- Farmer 2 -->
+      <div class="farmer-card bg-gradient-to-br from-green-600 to-green-800 rounded-3xl p-8 text-center text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8"></div>
+        <div class="w-28 h-28 rounded-full overflow-hidden mx-auto mb-5 border-4 border-white/30 relative z-10">
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=300&auto=format&fit=crop" class="w-full h-full object-cover" alt="Priyam Sharma">
+        </div>
+        <h4 class="font-display text-xl font-semibold mb-1">Priyam Sharma</h4>
+        <p class="text-green-200 text-sm mb-1">Sunshine Organic Farm</p>
+        <span class="text-xs text-green-300">Fruit &amp; Berry Expert</span>
+        <div class="flex justify-between mt-5 pt-5 border-t border-white/20 text-sm">
+          <div><div class="font-bold">8+</div><div class="text-green-300 text-xs">Years Exp</div></div>
+          <div><div class="font-bold">75+</div><div class="text-green-300 text-xs">Products</div></div>
+          <div><div class="font-bold">4.8★</div><div class="text-green-300 text-xs">Rating</div></div>
+        </div>
+      </div>
+
+      <!-- Farmer 3 -->
+      <div class="farmer-card bg-gradient-to-br from-green-600 to-green-800 rounded-3xl p-8 text-center text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8"></div>
+        <div class="w-28 h-28 rounded-full overflow-hidden mx-auto mb-5 border-4 border-white/30 relative z-10">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop" class="w-full h-full object-cover" alt="Amit Singh">
+        </div>
+        <h4 class="font-display text-xl font-semibold mb-1">Amit Singh</h4>
+        <p class="text-green-200 text-sm mb-1">Heritage Seeds Farm</p>
+        <span class="text-xs text-green-300">Traditional Grain Producer</span>
+        <div class="flex justify-between mt-5 pt-5 border-t border-white/20 text-sm">
+          <div><div class="font-bold">10+</div><div class="text-green-300 text-xs">Years Exp</div></div>
+          <div><div class="font-bold">30+</div><div class="text-green-300 text-xs">Products</div></div>
+          <div><div class="font-bold">5.0★</div><div class="text-green-300 text-xs">Rating</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACT / ORDER ===================== -->
+  <section id="contact" class="mt-24 mb-12 section-reveal">
+    <div class="bg-white rounded-[2rem] p-8 sm:p-12 lg:p-16 shadow-xl border border-stone-100 flex flex-col lg:flex-row gap-12 lg:gap-24">
+
+      <!-- Left: info -->
+      <div class="lg:w-1/2">
+        <h2 class="font-display text-4xl sm:text-5xl font-medium tracking-tight text-stone-900 mb-3 leading-tight">
+          Order &amp; <span class="text-green-700 italic">Contact Us</span>
+        </h2>
+        <p class="text-stone-500 text-lg font-light mb-10 max-w-md">Have questions about products, delivery, or farming partnerships? We'd love to hear from you.</p>
+
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 group">
+            <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center group-hover:bg-green-700 group-hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>
+            </div>
+            <div>
+              <span class="block text-xs text-stone-400 font-semibold uppercase tracking-wider">Phone</span>
+              <a href="tel:+919876543210" class="text-lg font-semibold text-stone-900 hover:text-green-700 transition-colors">+91 98765 43210</a>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 group">
+            <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center group-hover:bg-green-700 group-hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+            </div>
+            <div>
+              <span class="block text-xs text-stone-400 font-semibold uppercase tracking-wider">Email</span>
+              <a href="/cdn-cgi/l/email-protection#abc3cec7c7c4ebcdcad9c6cdd9ced8c385c8c4c6" class="text-lg font-semibold text-stone-900 hover:text-green-700 transition-colors"><span class="__cf_email__" data-cfemail="036b666f6f6c436562716e657166706b2d606c6e">[email&#160;protected]</span></a>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 group">
+            <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center group-hover:bg-green-700 group-hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <span class="block text-xs text-stone-400 font-semibold uppercase tracking-wider">Location</span>
+              <span class="text-lg font-semibold text-stone-900">Punjab, India</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div class="mt-8 rounded-2xl overflow-hidden border border-green-100">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3437.174971799996!2d76.65720287502891!3d30.5160910960714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390fc32344a6e2d7%3A0x81b346dee91799ca!2sChitkara%20University!5e0!3m2!1sen!2sin!4v1725121908695!5m2!1sen!2sin"
+            width="100%" height="220" style="border:0;" allowfullscreen loading="lazy"></iframe>
+        </div>
+      </div>
+
+      <!-- Right: Order form -->
+      <div class="lg:w-1/2 bg-green-50 rounded-3xl p-8 border border-green-100">
+        <h3 class="font-display text-2xl font-medium text-stone-900 mb-6">Place a Bulk Order</h3>
+        <div class="space-y-5">
+          <div class="grid grid-cols-2 gap-5">
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-stone-500 uppercase tracking-wider">Delivery Date</label>
+              <input type="date" class="w-full bg-white border-0 rounded-xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-green-600 focus:outline-none">
+            </div>
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-stone-500 uppercase tracking-wider">Quantity</label>
+              <select class="w-full bg-white border-0 rounded-xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-green-600 focus:outline-none">
+                <option>Small (1–5 kg)</option>
+                <option>Medium (5–20 kg)</option>
+                <option>Large (20–50 kg)</option>
+                <option>Bulk (50+ kg)</option>
+              </select>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-stone-500 uppercase tracking-wider">Your Name</label>
+            <input type="text" placeholder="Enter your name" class="w-full bg-white border-0 rounded-xl px-4 py-3 text-stone-900 placeholder-stone-300 focus:ring-2 focus:ring-green-600 focus:outline-none">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-stone-500 uppercase tracking-wider">Phone</label>
+            <input type="tel" placeholder="+91 98765 43210" class="w-full bg-white border-0 rounded-xl px-4 py-3 text-stone-900 placeholder-stone-300 focus:ring-2 focus:ring-green-600 focus:outline-none">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-stone-500 uppercase tracking-wider">Product Interest</label>
+            <textarea rows="2" placeholder="e.g., Tomatoes, Spinach, Mangoes..." class="w-full bg-white border-0 rounded-xl px-4 py-3 text-stone-900 placeholder-stone-300 focus:ring-2 focus:ring-green-600 focus:outline-none resize-none"></textarea>
+          </div>
+
+          <button type="button" onclick="submitOrder()" class="w-full bg-green-700 hover:bg-green-600 text-white font-semibold py-4 rounded-xl mt-2 transition-colors flex items-center justify-center gap-2 group">
+            Confirm Order
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="py-10 px-6 flex flex-col md:flex-row items-start justify-between border-t border-stone-200 gap-8">
+    <div class="space-y-4">
+      <div class="flex items-center gap-2.5">
+        <div class="bg-green-700 p-1.5 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        </div>
+        <span class="font-display text-stone-900 font-semibold text-lg">FarmFresh.</span>
+      </div>
+      <p class="text-sm text-stone-500 max-w-xs">Fresh organic produce, delivered daily. Supporting local farmers &amp; sustainable agriculture.</p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-8 sm:gap-16 text-sm">
+      <div>
+        <h4 class="font-semibold text-stone-900 mb-3">Explore</h4>
+        <ul class="space-y-2 text-stone-500">
+          <li><a href="#about" class="hover:text-green-700 transition-colors">About Us</a></li>
+          <li><a href="#shop" class="hover:text-green-700 transition-colors">Shop</a></li>
+          <li><a href="#farmers" class="hover:text-green-700 transition-colors">Our Farmers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-stone-900 mb-3">Account</h4>
+        <ul class="space-y-2 text-stone-500">
+          <li><a href="login.html" class="hover:text-green-700 transition-colors">Login</a></li>
+          <li><a href="register.html" class="hover:text-green-700 transition-colors">Register</a></li>
+          <li><a href="orders.html" class="hover:text-green-700 transition-colors">My Orders</a></li>
+          <li><a href="cart.html" class="hover:text-green-700 transition-colors">Cart</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-stone-900 mb-3">Follow Us</h4>
+        <div class="flex gap-3">
+          <a href="#" class="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center hover:bg-green-100 hover:text-green-700 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          </a>
+          <a href="#" class="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center hover:bg-green-100 hover:text-green-700 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="text-center pb-6 text-xs text-stone-400">
+    © 2024 FarmFresh. All rights reserved. | Supporting organic farming &amp; sustainable agriculture.
+  </div>
+
+</div>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  lucide.createIcons();
+
+  // Mobile menu
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+  }
+
+  // ── Load products from DB ──────────────────────────────────
+  async function loadProducts() {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af;">
+        <div style="width:36px;height:36px;border:3px solid #e8f0e8;border-radius:50%;border-top-color:#16a34a;animation:spin 1s linear infinite;margin:0 auto 12px;"></div>
+        Loading products...
+      </div>`;
+
+    try {
+      const res      = await fetch(`${API_URL}/products`);
+      const products = await res.json();
+
+      if (!products.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af;">No products available yet. Check back soon!</div>`;
+        return;
+      }
+
+      grid.innerHTML = products.map(p => `
+        <div class="product-card bg-white rounded-3xl overflow-hidden shadow-sm border border-stone-100">
+          <div class="relative h-52 bg-green-50 overflow-hidden">
+            ${p.image
+              ? `<img src="${p.image}" class="w-full h-full object-cover" alt="${p.name}" onerror="this.style.display='none'">`
+              : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+                </div>`
+            }
+            <span class="absolute top-3 right-3 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full capitalize">${p.category || 'Fresh'}</span>
+          </div>
+          <div class="p-5">
+            <h3 class="font-semibold text-stone-900 text-lg mb-1">${p.name}</h3>
+            <div class="flex gap-2 mb-3">
+              <span class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-medium">Organic</span>
+              <span class="bg-amber-50 text-amber-700 text-xs px-2.5 py-1 rounded-full font-medium">Farm Fresh</span>
+            </div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-bold text-green-600">₹${p.price}<span class="text-sm font-normal text-stone-400">/unit</span></span>
+              <div class="flex text-amber-400 text-xs gap-0.5">★★★★★</div>
+            </div>
+            <button
+              onclick="addToCart('${p._id}', this)"
+              class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+    } catch(e) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af;">Could not load products. Make sure the server is running.</div>`;
+    }
+  }
+
+  // ── Add to cart — real API call ────────────────────────────
+  async function addToCart(productId, btn) {
+    const token = getToken();
+
+    if (!token) {
+      if (confirm('Please login to add items to cart. Go to login page?')) {
+        window.location.href = 'login.html';
+      }
+      return;
+    }
+
+    // Button loading state
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;"></div> Adding...`;
+    }
+
+    try {
+      const res  = await fetch(`${API_URL}/cart/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ productId, qty: 1 })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        showCartToast('Item added to your cart! 🛒');
+      } else {
+        showCartToast(data.message || 'Failed to add to cart', 'error');
+      }
+    } catch(e) {
+      showCartToast('Server error. Please try again.', 'error');
+    }
+
+    // Reset button
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Add to Cart`;
+    }
+  }
+
+  // ── Toast notification ─────────────────────────────────────
+  function showCartToast(msg, type = 'success') {
+    const existing = document.getElementById('cartToast');
+    if (existing) existing.remove();
+
+    const bg = type === 'success'
+      ? 'linear-gradient(135deg, #16a34a, #15803d)'
+      : 'linear-gradient(135deg, #dc2626, #b91c1c)';
+
+    const n = document.createElement('div');
+    n.id = 'cartToast';
+    n.style.cssText = `
+      position:fixed; top:24px; right:24px;
+      background:${bg}; color:white;
+      padding:1rem 1.5rem; border-radius:14px;
+      box-shadow:0 10px 30px rgba(22,163,74,0.4);
+      z-index:10000; font-weight:600; font-size:0.9rem;
+      display:flex; align-items:center; gap:0.75rem;
+      animation:slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      font-family:'DM Sans',sans-serif;
+    `;
+    n.innerHTML = `
+      <div style="width:28px;height:28px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;">✓</div>
+      <span>${msg}</span>
+    `;
+    document.body.appendChild(n);
+    setTimeout(() => {
+      n.style.animation = 'slideOut 0.3s ease-in forwards';
+      setTimeout(() => n.remove(), 300);
+    }, 3000);
+  }
+
+  // Order form
+  function submitOrder() {
+    showCartToast('Bulk order request sent! We will contact you soon. 🌿');
+  }
+
+  // Section reveal on scroll
+  const reveals = document.querySelectorAll('.section-reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // ── Load real products from DB on page load ──
+  loadProducts();
+</script>
+
+<!-- ===================== HERO CANVAS ANIMATION ===================== -->
+<script>
+(function() {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    const parent = canvas.parentElement;
+    canvas.width = parent.offsetWidth;
+    canvas.height = parent.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const DEEP   = '#0a1f0d';
+  const MID1   = '#1a4d20';
+  const MID2   = '#1e6329';
+  const LIGHT1 = '#2d8c3c';
+  const LIGHT2 = '#3aaa4a';
+  const GOLD   = '#b8860b';
+  const CREAM  = '#e8f5e0';
+
+  const orbs = Array.from({length: 7}, (_, i) => ({
+    x: Math.random(), y: Math.random(),
+    r: 180 + Math.random() * 220,
+    speed: 0.00015 + Math.random() * 0.0002,
+    angle: Math.random() * Math.PI * 2,
+    color: [MID1, MID2, LIGHT1, DEEP, '#163d1a'][i % 5]
+  }));
+
+  function drawLeaf(x, y, size, angle, alpha, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.moveTo(0, -size);
+    ctx.bezierCurveTo(size*0.6, -size*0.5, size*0.6, size*0.5, 0, size);
+    ctx.bezierCurveTo(-size*0.6, size*0.5, -size*0.6, -size*0.5, 0, -size);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(0, -size*0.85);
+    ctx.lineTo(0, size*0.85);
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  const leaves = Array.from({length: 24}, () => ({
+    x: Math.random(), y: Math.random(),
+    size: 16 + Math.random() * 44,
+    angle: Math.random() * Math.PI * 2,
+    spinSpeed: (Math.random() - 0.5) * 0.004,
+    driftX: (Math.random() - 0.5) * 0.00012,
+    driftY: -0.00007 - Math.random() * 0.00015,
+    alpha: 0.07 + Math.random() * 0.2,
+    color: [LIGHT1, LIGHT2, MID2, '#4ab85e', '#267335'][Math.floor(Math.random()*5)]
+  }));
+
+  const particles = Array.from({length: 65}, () => ({
+    x: Math.random(), y: Math.random(),
+    r: 1.5 + Math.random() * 3,
+    speedY: -0.00005 - Math.random() * 0.0001,
+    speedX: (Math.random() - 0.5) * 0.00004,
+    alpha: 0.15 + Math.random() * 0.4,
+    color: [CREAM, LIGHT2, GOLD, 'white'][Math.floor(Math.random()*4)]
+  }));
+
+  function drawWave(offsetY, amp, freq, phase, alpha, color) {
+    const W = canvas.width, H = canvas.height;
+    ctx.beginPath();
+    ctx.moveTo(0, offsetY * H);
+    for (let x = 0; x <= W; x += 4) {
+      ctx.lineTo(x, offsetY * H + Math.sin(x * freq + phase) * amp);
+    }
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  let t = 0;
+
+  function draw() {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const grad = ctx.createLinearGradient(0, 0, W * 0.5, H);
+    grad.addColorStop(0, '#07180a');
+    grad.addColorStop(0.4, '#102614');
+    grad.addColorStop(0.75, '#17381b');
+    grad.addColorStop(1, '#0b200e');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+
+    const radial = ctx.createRadialGradient(W*0.72, H*0.15, 0, W*0.72, H*0.15, W*0.65);
+    radial.addColorStop(0, 'rgba(70,180,55,0.2)');
+    radial.addColorStop(1, 'transparent');
+    ctx.fillStyle = radial; ctx.fillRect(0, 0, W, H);
+
+    const radial2 = ctx.createRadialGradient(W*0.15, H*0.8, 0, W*0.15, H*0.8, W*0.45);
+    radial2.addColorStop(0, 'rgba(30,99,41,0.25)');
+    radial2.addColorStop(1, 'transparent');
+    ctx.fillStyle = radial2; ctx.fillRect(0, 0, W, H);
+
+    orbs.forEach(o => {
+      o.angle += o.speed;
+      const ox = (o.x + Math.cos(o.angle) * 0.13) * W;
+      const oy = (o.y + Math.sin(o.angle * 1.3) * 0.11) * H;
+      const rg = ctx.createRadialGradient(ox, oy, 0, ox, oy, o.r);
+      rg.addColorStop(0, o.color + '4a');
+      rg.addColorStop(1, 'transparent');
+      ctx.fillStyle = rg; ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(ox, oy, o.r, 0, Math.PI*2); ctx.fill();
+    });
+
+    drawWave(0.70, 32, 0.006, t*0.7,     0.11, '#2d8c3c');
+    drawWave(0.76, 26, 0.009, t*1.1+1,   0.09, '#1e6329');
+    drawWave(0.82, 20, 0.012, t*0.9+2,   0.12, '#163d1a');
+    drawWave(0.88, 16, 0.015, t*1.3+3,   0.17, '#0f2d14');
+    drawWave(0.94, 12, 0.018, t*1.0+4,   0.22, '#091a0b');
+
+    leaves.forEach(l => {
+      l.x += l.driftX; l.y += l.driftY; l.angle += l.spinSpeed;
+      if (l.y < -0.06) { l.y = 1.06; l.x = Math.random(); }
+      if (l.x < -0.06) l.x = 1.06;
+      if (l.x > 1.06)  l.x = -0.06;
+      drawLeaf(l.x*W, l.y*H, l.size, l.angle, l.alpha, l.color);
+    });
+
+    ctx.globalAlpha = 1;
+    particles.forEach(p => {
+      p.x += p.speedX; p.y += p.speedY;
+      if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); }
+      if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath(); ctx.arc(p.x*W, p.y*H, p.r, 0, Math.PI*2);
+      ctx.fillStyle = p.color; ctx.fill();
+      ctx.restore();
+    });
+
+    for (let i = 0; i < 5; i++) {
+      const sx = (0.08 + i*0.22 + Math.sin(t*0.3+i)*0.04) * W;
+      const sy = (0.04 + Math.cos(t*0.2+i*1.2)*0.03) * H;
+      const len = 70 + Math.sin(t+i)*28;
+      const sg = ctx.createLinearGradient(sx, sy, sx+len*0.6, sy+len);
+      sg.addColorStop(0, 'rgba(184,134,11,0)');
+      sg.addColorStop(0.5, 'rgba(184,134,11,0.14)');
+      sg.addColorStop(1, 'rgba(184,134,11,0)');
+      ctx.save(); ctx.globalAlpha = 1;
+      ctx.strokeStyle = sg; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx+len*0.6, sy+len);
+      ctx.stroke(); ctx.restore();
+    }
+
+    ctx.globalAlpha = 1;
+    t += 0.012;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+</script>
+
+</body>
+</html>

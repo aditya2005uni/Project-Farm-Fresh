@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - FarmFresh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #F4F7F2; color: #1a2e1a; min-height: 100vh; }
+.font-display { font-family: 'Fraunces', serif; }
+
+@keyframes fadeUp   { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin     { to { transform: rotate(360deg); } }
+@keyframes slideIn  { from { transform:translateX(110%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@keyframes slideOut { from { transform:translateX(0); opacity:1; } to { transform:translateX(110%); opacity:0; } }
+@keyframes shimmer  { 0% { background-position:-600px 0; } 100% { background-position:600px 0; } }
+
+.fade-up   { animation: fadeUp 0.55s ease both; }
+.fade-up-1 { animation: fadeUp 0.55s 0.08s ease both; }
+.fade-up-2 { animation: fadeUp 0.55s 0.16s ease both; }
+.fade-up-3 { animation: fadeUp 0.55s 0.24s ease both; }
+
+/* Sidebar */
+.sidebar { width: 260px; min-height: 100vh; background: #0f2d14; position: fixed; top: 0; left: 0; z-index: 100; display: flex; flex-direction: column; transition: transform 0.3s ease; }
+.sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 12px; color: rgba(255,255,255,0.65); font-size: 0.875rem; font-weight: 500; text-decoration: none; cursor: pointer; border: none; background: none; width: 100%; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+.sidebar-link:hover { background: rgba(255,255,255,0.08); color: white; }
+.sidebar-link.active { background: rgba(255,255,255,0.12); color: white; }
+.sidebar-link.active .link-dot { background: #4ade80; }
+
+/* Main content */
+.main { margin-left: 260px; min-height: 100vh; }
+
+/* Stat card */
+.stat-card { background: white; border-radius: 20px; border: 1px solid #e8f0e8; padding: 24px; transition: transform 0.25s, box-shadow 0.25s; }
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { background: #f8fbf8; font-size: 0.72rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; padding: 12px 16px; text-align: left; border-bottom: 1px solid #f0f5f0; }
+.data-table td { padding: 14px 16px; font-size: 0.875rem; color: #374151; border-bottom: 1px solid #f8fbf8; vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #fafff9; }
+
+/* Status badge */
+.status-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; }
+.s-pending    { background:#fef9c3; color:#854d0e; }
+.s-confirmed  { background:#dbeafe; color:#1e40af; }
+.s-processing { background:#ede9fe; color:#5b21b6; }
+.s-shipped    { background:#e0f2fe; color:#075985; }
+.s-delivered  { background:#dcfce7; color:#166534; }
+.s-cancelled  { background:#fee2e2; color:#991b1b; }
+
+/* Form input */
+.f-input { width:100%; border:1.5px solid #e8f0e8; border-radius:12px; padding:10px 14px; font-family:'DM Sans',sans-serif; font-size:0.875rem; color:#1a2e1a; background:#fafff9; outline:none; transition:border-color 0.2s; }
+.f-input:focus { border-color:#16a34a; }
+.f-label { display:block; font-size:0.72rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+
+/* Action btn */
+.btn-primary { background:#15803d; color:white; border:none; padding:10px 20px; border-radius:12px; font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.875rem; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:all 0.2s; }
+.btn-primary:hover { background:#166534; transform:translateY(-1px); box-shadow:0 6px 18px rgba(21,128,61,0.3); }
+.btn-danger  { background:#fef2f2; color:#dc2626; border:1.5px solid #fecaca; padding:8px 14px; border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.78rem; cursor:pointer; transition:all 0.2s; }
+.btn-danger:hover  { background:#fee2e2; }
+.btn-edit    { background:#f0fdf4; color:#15803d; border:1.5px solid #bbf7d0; padding:8px 14px; border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.78rem; cursor:pointer; transition:all 0.2s; }
+.btn-edit:hover    { background:#dcfce7; }
+
+/* Tab section */
+.section { display:none; }
+.section.active { display:block; }
+
+/* Modal overlay */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; }
+.modal-box { background:white; border-radius:24px; padding:32px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,0.18); }
+
+/* Skeleton */
+.skeleton { background:linear-gradient(90deg,#f0f5f0 25%,#e8f0e8 50%,#f0f5f0 75%); background-size:600px 100%; animation:shimmer 1.4s infinite; border-radius:8px; }
+
+/* Select */
+.f-select { width:100%; border:1.5px solid #e8f0e8; border-radius:12px; padding:10px 14px; font-family:'DM Sans',sans-serif; font-size:0.875rem; color:#1a2e1a; background:#fafff9; outline:none; cursor:pointer; }
+.f-select:focus { border-color:#16a34a; }
+
+@media(max-width:900px) {
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; }
+  #sidebarOverlay { display:block; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== SIDEBAR ===================== -->
+<aside class="sidebar" id="sidebar">
+  <!-- Logo -->
+  <div style="padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.08);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="background:rgba(255,255,255,0.15);padding:8px;border-radius:12px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      </div>
+      <div>
+        <div class="font-display" style="color:white;font-size:1.05rem;font-weight:500;">FarmFresh</div>
+        <div style="color:rgba(255,255,255,0.45);font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Admin Panel</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav links -->
+  <nav style="padding:20px 12px;flex:1;display:flex;flex-direction:column;gap:4px;">
+    <button class="sidebar-link active" onclick="switchTab('dashboard', this)">
+      <div class="link-dot" style="width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0;"></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="sidebar-link" onclick="switchTab('products', this)">
+      <div class="link-dot" style="width:7px;height:7px;border-radius:50%;background:transparent;flex-shrink:0;"></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      Products
+    </button>
+    <button class="sidebar-link" onclick="switchTab('orders', this)">
+      <div class="link-dot" style="width:7px;height:7px;border-radius:50%;background:transparent;flex-shrink:0;"></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      All Orders
+    </button>
+  </nav>
+
+  <!-- Bottom: back to site + logout -->
+  <div style="padding:16px 12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:4px;">
+    <a href="index.html" class="sidebar-link">
+      <div class="link-dot" style="width:7px;height:7px;border-radius:50%;background:transparent;flex-shrink:0;"></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Back to Site
+    </a>
+    <button class="sidebar-link" onclick="handleLogout()" style="color:rgba(239,68,68,0.7);" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='rgba(239,68,68,0.7)'">
+      <div class="link-dot" style="width:7px;height:7px;border-radius:50%;background:transparent;flex-shrink:0;"></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
+  </div>
+</aside>
+
+<!-- Mobile sidebar overlay -->
+<div id="sidebarOverlay" onclick="closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;"></div>
+
+<!-- ===================== MAIN CONTENT ===================== -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div style="background:white;border-bottom:1px solid #e8f0e8;padding:0 32px;height:68px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <!-- Mobile hamburger -->
+      <button onclick="openSidebar()" style="display:none;width:36px;height:36px;border-radius:10px;border:1.5px solid #e8f0e8;background:white;cursor:pointer;align-items:center;justify-content:center;" id="mobileHamburger">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <h2 class="font-display" style="font-size:1.1rem;font-weight:500;color:#1a2e1a;" id="pageTitle">Dashboard</h2>
+        <p style="font-size:0.75rem;color:#9ca3af;" id="pageSubtitle">Overview of your store</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="text-align:right;">
+        <div style="font-size:0.8rem;font-weight:600;color:#1a2e1a;">Admin</div>
+        <div style="font-size:0.7rem;color:#9ca3af;">FarmFresh</div>
+      </div>
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#15803d,#166534);display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:32px;">
+
+    <!-- ==================== DASHBOARD TAB ==================== -->
+    <div class="section active" id="tab-dashboard">
+
+      <!-- Stat cards -->
+      <div class="fade-up" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px;">
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+            <div style="width:42px;height:42px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+            </div>
+            <span style="font-size:0.7rem;font-weight:700;color:#16a34a;background:#f0fdf4;padding:3px 8px;border-radius:999px;">Live</span>
+          </div>
+          <div class="font-display" style="font-size:2rem;font-weight:500;color:#1a2e1a;" id="stat-products">—</div>
+          <div style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">Total Products</div>
+        </div>
+
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+            <div style="width:42px;height:42px;background:#eff6ff;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+          </div>
+          <div class="font-display" style="font-size:2rem;font-weight:500;color:#1a2e1a;" id="stat-orders">—</div>
+          <div style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">Total Orders</div>
+        </div>
+
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+            <div style="width:42px;height:42px;background:#fef9c3;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+          </div>
+          <div class="font-display" style="font-size:2rem;font-weight:500;color:#1a2e1a;" id="stat-pending">—</div>
+          <div style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">Pending Orders</div>
+        </div>
+
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+            <div style="width:42px;height:42px;background:#dcfce7;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+          </div>
+          <div class="font-display" style="font-size:2rem;font-weight:500;color:#15803d;" id="stat-revenue">—</div>
+          <div style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">Total Revenue</div>
+        </div>
+      </div>
+
+      <!-- Recent orders table -->
+      <div class="fade-up-1" style="background:white;border-radius:24px;border:1px solid #e8f0e8;overflow:hidden;">
+        <div style="padding:20px 24px;border-bottom:1px solid #f0f5f0;display:flex;align-items:center;justify-content:space-between;">
+          <h3 class="font-display" style="font-size:1.1rem;font-weight:500;color:#1a2e1a;">Recent Orders</h3>
+          <button class="btn-primary" onclick="goToOrders()">
+            View All
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="recentOrdersTable">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="recentOrdersBody">
+              <tr><td colspan="6"><div class="skeleton" style="height:14px;margin:4px 0;"></div></td></tr>
+              <tr><td colspan="6"><div class="skeleton" style="height:14px;margin:4px 0;"></div></td></tr>
+              <tr><td colspan="6"><div class="skeleton" style="height:14px;margin:4px 0;"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PRODUCTS TAB ==================== -->
+    <div class="section" id="tab-products">
+
+      <!-- Header row -->
+      <div class="fade-up" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div>
+          <h2 class="font-display" style="font-size:1.6rem;font-weight:500;color:#1a2e1a;">Products</h2>
+          <p style="color:#9ca3af;font-size:0.85rem;">Manage your organic produce listings</p>
+        </div>
+        <button class="btn-primary" onclick="openProductModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Product
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="fade-up-1" style="margin-bottom:20px;position:relative;max-width:360px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="f-input" type="text" placeholder="Search products..." id="productSearch" oninput="filterProducts()" style="padding-left:40px;">
+      </div>
+
+      <!-- Products table -->
+      <div class="fade-up-2" style="background:white;border-radius:24px;border:1px solid #e8f0e8;overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody">
+              <tr><td colspan="5" style="text-align:center;padding:40px;color:#9ca3af;">
+                <div style="width:32px;height:32px;border:3px solid #e8f0e8;border-radius:50%;border-top-color:#16a34a;animation:spin 1s linear infinite;margin:0 auto 12px;"></div>
+                Loading products...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ORDERS TAB ==================== -->
+    <div class="section" id="tab-orders">
+
+      <!-- Header -->
+      <div class="fade-up" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div>
+          <h2 class="font-display" style="font-size:1.6rem;font-weight:500;color:#1a2e1a;">All Orders</h2>
+          <p style="color:#9ca3af;font-size:0.85rem;">View and manage every customer order</p>
+        </div>
+        <!-- Filter -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select class="f-select" id="orderStatusFilter" onchange="filterOrders()" style="width:auto;min-width:150px;">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <input class="f-input" type="text" placeholder="Search by customer..." id="orderSearch" oninput="filterOrders()" style="width:200px;">
+        </div>
+      </div>
+
+      <!-- Orders table -->
+      <div class="fade-up-1" style="background:white;border-radius:24px;border:1px solid #e8f0e8;overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Update Status</th>
+              </tr>
+            </thead>
+            <tbody id="allOrdersBody">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:#9ca3af;">
+                <div style="width:32px;height:32px;border:3px solid #e8f0e8;border-radius:50%;border-top-color:#16a34a;animation:spin 1s linear infinite;margin:0 auto 12px;"></div>
+                Loading orders...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /padding -->
+</div><!-- /main -->
+
+<!-- ==================== PRODUCT MODAL ==================== -->
+<div class="modal-overlay" id="productModal" style="display:none;" onclick="if(event.target===this)closeProductModal()">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <h3 class="font-display" style="font-size:1.3rem;font-weight:500;color:#1a2e1a;" id="modalTitle">Add Product</h3>
+      <button onclick="closeProductModal()" style="width:32px;height:32px;border-radius:50%;border:1.5px solid #e8f0e8;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <input type="hidden" id="editProductId">
+
+      <div>
+        <label class="f-label">Product Name *</label>
+        <input class="f-input" type="text" id="pName" placeholder="e.g. Organic Tomatoes">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label class="f-label">Price (₹) *</label>
+          <input class="f-input" type="number" id="pPrice" placeholder="e.g. 40" min="0">
+        </div>
+        <div>
+          <label class="f-label">Stock Quantity</label>
+          <input class="f-input" type="number" id="pStock" placeholder="e.g. 100" min="0">
+        </div>
+      </div>
+
+      <div>
+        <label class="f-label">Category</label>
+        <select class="f-select" id="pCategory">
+          <option value="">Select category</option>
+          <option value="vegetables">Vegetables</option>
+          <option value="fruits">Fruits</option>
+          <option value="grains">Grains</option>
+          <option value="herbs">Herbs & Spices</option>
+          <option value="dairy">Dairy</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="f-label">Description</label>
+        <textarea class="f-input" id="pDescription" rows="3" placeholder="Describe this product..." style="resize:vertical;"></textarea>
+      </div>
+
+      <div>
+        <label class="f-label">Image URL</label>
+        <input class="f-input" type="url" id="pImage" placeholder="https://...">
+      </div>
+
+      <!-- Preview -->
+      <div id="imgPreview" style="display:none;border-radius:12px;overflow:hidden;height:120px;background:#f0fdf4;border:1px solid #bbf7d0;">
+        <img id="imgPreviewEl" style="width:100%;height:100%;object-fit:cover;" alt="Preview">
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn-primary" style="flex:1;justify-content:center;" onclick="saveProduct()" id="saveProductBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Product
+        </button>
+        <button onclick="closeProductModal()" style="padding:10px 20px;border:1.5px solid #e8f0e8;border-radius:12px;background:white;color:#6b7280;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.875rem;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="display:none;position:fixed;top:24px;right:24px;z-index:9999;"></div>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script src="script.js"></script>
+<script>
+
+/* ─── DATA STORES ─── */
+let allProducts = [];
+let allOrders   = [];
+
+/* ─── GO TO ORDERS (from dashboard View All btn) ─── */
+function goToOrders() {
+  const ordersBtn = document.querySelectorAll('.sidebar-link')[2];
+  switchTab('orders', ordersBtn);
+}
+
+/* ─── TAB SWITCHER ─── */
+function switchTab(tab, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l => {
+    l.classList.remove('active');
+    l.querySelector('.link-dot').style.background = 'transparent';
+  });
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (btn) {
+    btn.classList.add('active');
+    btn.querySelector('.link-dot').style.background = '#4ade80';
+  }
+  const titles = { dashboard:'Dashboard', products:'Products', orders:'All Orders' };
+  const subs   = { dashboard:'Overview of your store', products:'Manage your organic produce listings', orders:'View and manage every customer order' };
+  document.getElementById('pageTitle').textContent    = titles[tab] || tab;
+  document.getElementById('pageSubtitle').textContent = subs[tab]  || '';
+}
+
+/* ─── SIDEBAR MOBILE ─── */
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').style.display='block'; }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display='none'; }
+
+/* ─── TOAST ─── */
+function showToast(msg, type='success') {
+  const t  = document.getElementById('toast');
+  const bg = type==='success' ? 'linear-gradient(135deg,#15803d,#166534)' : 'linear-gradient(135deg,#dc2626,#b91c1c)';
+  const icon = type==='success'
+    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  t.style.cssText = `position:fixed;top:24px;right:24px;z-index:9999;background:${bg};color:white;padding:14px 20px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.2);font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.875rem;display:flex;align-items:center;gap:10px;min-width:220px;animation:slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1);`;
+  t.innerHTML = icon + `<span>${msg}</span>`;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => {
+    t.style.animation = 'slideOut 0.3s ease-in forwards';
+    setTimeout(() => { t.style.display='none'; }, 300);
+  }, 3000);
+}
+
+/* ─── HELPERS ─── */
+function shortId(id)  { return id ? '#' + String(id).slice(-6).toUpperCase() : '#------'; }
+function fmt(d)       { return d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—'; }
+function statusBadge(s) {
+  const cls = { pending:'s-pending', confirmed:'s-confirmed', processing:'s-processing', shipped:'s-shipped', delivered:'s-delivered', cancelled:'s-cancelled' };
+  return `<span class="status-badge ${cls[s]||'s-pending'}">${s||'pending'}</span>`;
+}
+
+/* ─── LOAD PRODUCTS ─── */
+async function loadProducts() {
+  try {
+    const res  = await fetch(`${API_URL}/products`);
+    allProducts = await res.json();
+  } catch(e) {
+    allProducts = [
+      { _id:'p1', name:'Organic Tomatoes',  price:40,  category:'vegetables', stock:120 },
+      { _id:'p2', name:'Baby Spinach',       price:35,  category:'vegetables', stock:80  },
+      { _id:'p3', name:'Alphonso Mangoes',   price:120, category:'fruits',     stock:50  },
+      { _id:'p4', name:'Fresh Carrots',      price:30,  category:'vegetables', stock:200 },
+      { _id:'p5', name:'Basmati Rice (1kg)', price:85,  category:'grains',     stock:60  },
+    ];
+  }
+  renderProductsTable(allProducts);
+  document.getElementById('stat-products').textContent = allProducts.length;
+}
+
+/* ─── RENDER PRODUCTS TABLE ─── */
+function renderProductsTable(products) {
+  const tbody = document.getElementById('productsTableBody');
+  if (!products.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#9ca3af;">No products found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = products.map(p => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+            ${p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'">` : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`}
+          </div>
+          <div>
+            <div style="font-weight:600;color:#1a2e1a;">${p.name}</div>
+            <div style="font-size:0.72rem;color:#9ca3af;">${p._id ? shortId(p._id) : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td><span style="font-weight:700;color:#15803d;">₹${p.price}</span></td>
+      <td><span style="background:#ecfdf5;color:#059669;font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:999px;text-transform:capitalize;">${p.category||'—'}</span></td>
+      <td>
+        <span style="font-weight:600;color:${(p.stock||0)<20?'#dc2626':'#374151'};">
+          ${p.stock !== undefined ? p.stock : '—'}
+          ${(p.stock||0)<20 ? '<span style="font-size:0.7rem;color:#dc2626;margin-left:4px;">Low</span>' : ''}
+        </span>
+      </td>
+      <td>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-edit" onclick="openEditModal('${p._id}')">Edit</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ─── FILTER PRODUCTS ─── */
+function filterProducts() {
+  const q = document.getElementById('productSearch').value.toLowerCase();
+  renderProductsTable(allProducts.filter(p => p.name.toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q)));
+}
+
+/* ─── LOAD ORDERS ─── */
+async function loadOrders() {
+  try {
+    const token = getToken();
+    const res   = await fetch(`${API_URL}/orders/all`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    allOrders = await res.json();
+  } catch(e) {
+    allOrders = [
+      { _id:'o1', user:{name:'Priya Sharma',  email:'priya@email.com'}, items:[{product:{name:'Tomatoes'},qty:2},{product:{name:'Spinach'},qty:1}], total:115, status:'delivered',  createdAt: new Date(Date.now()-7*86400000) },
+      { _id:'o2', user:{name:'Rahul Verma',   email:'rahul@email.com'}, items:[{product:{name:'Mangoes'},qty:3}],                                   total:360, status:'shipped',    createdAt: new Date(Date.now()-2*86400000) },
+      { _id:'o3', user:{name:'Anjali Singh',  email:'anjali@email.com'},items:[{product:{name:'Carrots'},qty:2},{product:{name:'Rice'},qty:1}],      total:145, status:'pending',    createdAt: new Date(Date.now()-3600000)   },
+      { _id:'o4', user:{name:'Vikram Patel',  email:'vikram@email.com'},items:[{product:{name:'Spinach'},qty:4}],                                   total:140, status:'confirmed',  createdAt: new Date(Date.now()-86400000)  },
+      { _id:'o5', user:{name:'Meena Reddy',   email:'meena@email.com'}, items:[{product:{name:'Tomatoes'},qty:1}],                                  total:40,  status:'cancelled',  createdAt: new Date(Date.now()-4*86400000) },
+    ];
+  }
+
+  // Stats
+  const pending = allOrders.filter(o => !['delivered','cancelled'].includes(o.status)).length;
+  const revenue = allOrders.filter(o => o.status!=='cancelled').reduce((s,o)=>s+(o.total||0),0);
+  document.getElementById('stat-orders').textContent  = allOrders.length;
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+
+  renderRecentOrders(allOrders.slice(0, 5));
+  renderAllOrders(allOrders);
+}
+
+/* ─── RENDER RECENT ORDERS (dashboard) ─── */
+function renderRecentOrders(orders) {
+  document.getElementById('recentOrdersBody').innerHTML = orders.map(o => `
+    <tr>
+      <td><span style="font-weight:700;color:#1a2e1a;font-family:'Fraunces',serif;">${shortId(o._id)}</span></td>
+      <td>
+        <div style="font-weight:600;color:#374151;">${o.user?.name||'—'}</div>
+        <div style="font-size:0.72rem;color:#9ca3af;">${o.user?.email||''}</div>
+      </td>
+      <td>${o.items?.length||0} item${(o.items?.length||0)!==1?'s':''}</td>
+      <td><span style="font-weight:700;color:#15803d;">₹${(o.total||0).toFixed(2)}</span></td>
+      <td>${statusBadge(o.status)}</td>
+      <td style="color:#9ca3af;font-size:0.8rem;">${fmt(o.createdAt)}</td>
+    </tr>
+  `).join('');
+}
+
+/* ─── RENDER ALL ORDERS (orders tab) ─── */
+function renderAllOrders(orders) {
+  const tbody = document.getElementById('allOrdersBody');
+  if (!orders.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#9ca3af;">No orders found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = orders.map(o => `
+    <tr>
+      <td><span style="font-weight:700;color:#1a2e1a;font-family:'Fraunces',serif;">${shortId(o._id)}</span></td>
+      <td>
+        <div style="font-weight:600;color:#374151;">${o.user?.name||'Customer'}</div>
+        <div style="font-size:0.72rem;color:#9ca3af;">${o.user?.email||''}</div>
+      </td>
+      <td>
+        <div style="font-size:0.8rem;color:#6b7280;max-width:180px;">
+          ${(o.items||[]).slice(0,2).map(i=>`${i.product?.name||'Item'} ×${i.qty}`).join(', ')}
+          ${(o.items?.length||0)>2?`<span style="color:#9ca3af;"> +${o.items.length-2} more</span>`:''}
+        </div>
+      </td>
+      <td><span style="font-weight:700;color:#15803d;">₹${(o.total||0).toFixed(2)}</span></td>
+      <td>${statusBadge(o.status)}</td>
+      <td style="color:#9ca3af;font-size:0.8rem;">${fmt(o.createdAt)}</td>
+      <td>
+        <select class="f-select" style="width:140px;font-size:0.78rem;padding:7px 10px;" onchange="updateOrderStatus('${o._id}', this.value, this)">
+          <option value="pending"    ${o.status==='pending'    ?'selected':''}>Pending</option>
+          <option value="processing" ${o.status==='processing' ?'selected':''}>Processing</option>
+          <option value="created"    ${o.status==='created'    ?'selected':''}>Created</option>
+          <option value="completed"  ${o.status==='completed'  ?'selected':''}>Completed</option>
+          <option value="cancelled"  ${o.status==='cancelled'  ?'selected':''}>Cancelled</option>
+          <option value="delivered"  ${o.status==='delivered' ?'selected':''}>Delivered</option>
+          <option value="cancelled"  ${o.status==='cancelled' ?'selected':''}>Cancelled</option>
+        </select>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ─── FILTER ORDERS ─── */
+function filterOrders() {
+  const status = document.getElementById('orderStatusFilter').value;
+  const search = document.getElementById('orderSearch').value.toLowerCase();
+  let filtered = allOrders;
+  if (status) filtered = filtered.filter(o => o.status === status);
+  if (search) filtered = filtered.filter(o => (o.user?.name||'').toLowerCase().includes(search) || (o.user?.email||'').toLowerCase().includes(search));
+  renderAllOrders(filtered);
+}
+
+/* ─── UPDATE ORDER STATUS ─── */
+async function updateOrderStatus(orderId, newStatus, selectEl) {
+  selectEl.disabled = true;
+  try {
+    const token = getToken();
+    await fetch(`${API_URL}/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+      body: JSON.stringify({ status: newStatus })
+    });
+    const o = allOrders.find(o => o._id === orderId);
+    if (o) o.status = newStatus;
+    showToast(`Order status updated to "${newStatus}"`);
+  } catch(e) {
+    const o = allOrders.find(o => o._id === orderId);
+    if (o) o.status = newStatus;
+    showToast(`Status updated to "${newStatus}"`);
+  }
+  selectEl.disabled = false;
+}
+
+/* ─── PRODUCT MODAL: OPEN (add) ─── */
+function openProductModal() {
+  document.getElementById('modalTitle').textContent = 'Add New Product';
+  document.getElementById('saveProductBtn').innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Save Product`;
+  document.getElementById('editProductId').value = '';
+  document.getElementById('pName').value        = '';
+  document.getElementById('pPrice').value       = '';
+  document.getElementById('pStock').value       = '';
+  document.getElementById('pCategory').value    = '';
+  document.getElementById('pDescription').value = '';
+  document.getElementById('pImage').value       = '';
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('productModal').style.display = 'flex';
+}
+
+/* ─── PRODUCT MODAL: OPEN (edit) ─── */
+function openEditModal(productId) {
+  const p = allProducts.find(p => p._id === productId);
+  if (!p) return;
+  document.getElementById('modalTitle').textContent = 'Edit Product';
+  document.getElementById('saveProductBtn').innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Update Product`;
+  document.getElementById('editProductId').value = p._id;
+  document.getElementById('pName').value         = p.name || '';
+  document.getElementById('pPrice').value        = p.price || '';
+  document.getElementById('pStock').value        = p.stock !== undefined ? p.stock : '';
+  document.getElementById('pCategory').value     = p.category || '';
+  document.getElementById('pDescription').value  = p.description || '';
+  document.getElementById('pImage').value        = p.image || '';
+  if (p.image) {
+    document.getElementById('imgPreviewEl').src = p.image;
+    document.getElementById('imgPreview').style.display = 'block';
+  }
+  document.getElementById('productModal').style.display = 'flex';
+}
+
+/* ─── PRODUCT MODAL: CLOSE ─── */
+function closeProductModal() { document.getElementById('productModal').style.display = 'none'; }
+
+/* ─── IMAGE PREVIEW ─── */
+document.getElementById('pImage').addEventListener('input', function() {
+  const url = this.value.trim();
+  if (url) {
+    document.getElementById('imgPreviewEl').src = url;
+    document.getElementById('imgPreview').style.display = 'block';
+  } else {
+    document.getElementById('imgPreview').style.display = 'none';
+  }
+});
+
+/* ─── SAVE PRODUCT (create or update) ─── */
+async function saveProduct() {
+  const id   = document.getElementById('editProductId').value;
+  const name = document.getElementById('pName').value.trim();
+  const price= parseFloat(document.getElementById('pPrice').value);
+
+  if (!name) { showToast('Product name is required', 'error'); return; }
+  if (!price || price <= 0) { showToast('Valid price is required', 'error'); return; }
+
+  const payload = {
+    name,
+    price,
+    stock:       parseInt(document.getElementById('pStock').value) || 0,
+    category:    document.getElementById('pCategory').value,
+    description: document.getElementById('pDescription').value.trim(),
+    image:       document.getElementById('pImage').value.trim(),
+  };
+
+  const btn = document.getElementById('saveProductBtn');
+  btn.innerHTML = `<div style="width:15px;height:15px;border:2px solid rgba(255,255,255,0.4);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;"></div> Saving...`;
+  btn.disabled = true;
+
+  try {
+    const token  = getToken();
+    const method = id ? 'PUT' : 'POST';
+    const url    = id ? `${API_URL}/products/${id}` : `${API_URL}/products`;
+    const res    = await fetch(url, {
+      method,
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+      body: JSON.stringify(payload)
+    });
+    const saved = await res.json();
+
+    if (id) {
+      const idx = allProducts.findIndex(p => p._id === id);
+      if (idx > -1) allProducts[idx] = { ...allProducts[idx], ...payload };
+    } else {
+      allProducts.unshift({ _id: saved._id || 'new-'+Date.now(), ...payload });
+    }
+    document.getElementById('stat-products').textContent = allProducts.length;
+    showToast(id ? 'Product updated!' : 'Product added!');
+  } catch(e) {
+    // demo mode
+    if (id) {
+      const idx = allProducts.findIndex(p => p._id === id);
+      if (idx > -1) allProducts[idx] = { ...allProducts[idx], ...payload };
+    } else {
+      allProducts.unshift({ _id:'new-'+Date.now(), ...payload });
+    }
+    document.getElementById('stat-products').textContent = allProducts.length;
+    showToast(id ? 'Product updated!' : 'Product added!');
+  }
+
+  renderProductsTable(allProducts);
+  closeProductModal();
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Save Product`;
+}
+
+/* ─── LOGOUT ─── */
+function handleLogout() {
+  if (typeof logout === 'function') logout();
+  else { localStorage.clear(); window.location.href = 'login.html'; }
+}
+
+/* ─── MOBILE TOPBAR ─── */
+if (window.innerWidth <= 900) {
+  document.getElementById('mobileHamburger').style.display = 'flex';
+}
+window.addEventListener('resize', () => {
+  document.getElementById('mobileHamburger').style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+});
+
+/* ─── INIT ─── */
+loadProducts();
+loadOrders();
+</script>
+
+</body>
+</html>
